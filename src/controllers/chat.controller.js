@@ -14,7 +14,8 @@ async function createChat(req, res) {
         chat:{
             _id: chat._id,
             title: chat.title,
-            lastActive: chat.lastActive
+            lastActive: chat.lastActive,
+            user: chat.user
         }
     })
 
