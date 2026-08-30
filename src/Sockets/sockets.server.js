@@ -61,23 +61,34 @@ function initSocketServer(httpServer) {
             try {
                 console.log("Received AI message:", messagePayload);
 
-                await msgModel.create(
-                    {
-                        chat: messagePayload.chat,
-                        user: socket.user._id,
-                        content: messagePayload.content,
-                        role: 'user'
-                    }
-                )
+                await msgModel.create({
+                    chat: messagePayload.chat,
+                    user: socket.user._id,
+                    content: messagePayload.content,
+                    role: 'user'
+                });
 
-                const response = await aiService.generateResponse(messagePayload.content);
+                const chatHistory = await msgModel.find({
+                    chat: messagePayload.chat
+                }).sort({ createdAt: 1 });
+
+                const formattedHistory = chatHistory.map(item => ({
+                    role: item.role,
+                    parts: [{
+                        text: item.content
+                    }]
+                }));
+
+                console.log("Chat History:", formattedHistory);
+
+                const response = await aiService.generateResponse(formattedHistory);
 
                 await msgModel.create({
                     chat: messagePayload.chat,
                     user: socket.user._id,
                     content: response,
                     role: 'model'
-                })
+                });
 
                 socket.emit('ai-response', {
                     content: response,
