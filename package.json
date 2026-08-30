@@ -20,6 +20,7 @@
   },
   "homepage": "https://github.com/itsam-13/Project-GPT#readme",
   "dependencies": {
+    "@google/genai": "^2.19.0",
     "bcryptjs": "^3.0.3",
     "cookie": "^2.0.1",
     "cookie-parser": "^1.4.7",

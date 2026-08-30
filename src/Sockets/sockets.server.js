@@ -2,6 +2,7 @@ const { Server } = require("socket.io");
 const cookie = require('cookie');
 const jwt = require('jsonwebtoken');
 const userModel = require('../models/user.model');
+const aiService = require('../Services/ai.services')
 
 function initSocketServer(httpServer) {
 
@@ -25,9 +26,9 @@ function initSocketServer(httpServer) {
                 ? authHeader.slice(7)
                 : authHeader;
 
-            const token = cookies.token 
-                || socket.handshake.auth?.token 
-                || bearerToken 
+            const token = cookies.token
+                || socket.handshake.auth?.token
+                || bearerToken
                 || socket.handshake.query?.token;
 
             if (!token) {
@@ -45,7 +46,7 @@ function initSocketServer(httpServer) {
 
             socket.user = user;
             return next();
-            
+
         } catch (error) {
             console.error("Socket authentication error:", error.message);
             return next(new Error("Authentication Error: " + error.message));
@@ -53,10 +54,26 @@ function initSocketServer(httpServer) {
     });
 
     io.on("connection", (socket) => {
-        socket.on("ai-message",async (messagePayload)=>{
-            console.log("Received ai-message:", messagePayload);
-            
-        })
+        console.log("New Socket Connected:", socket.id, "| User:", socket.user?.email || socket.user?._id);
+
+        socket.on("ai-message", async (messagePayload) => {
+            try {
+                console.log("Received AI message:", messagePayload);
+
+                const response = await aiService.generateResponse(messagePayload.content);
+
+                socket.emit('ai-response', {
+                    content: response,
+                    chat: messagePayload.chat
+                });
+            } catch (error) {
+                console.error("AI Generation error:", error.message);
+                socket.emit('ai-error', {
+                    message: "Failed to generate AI response: " + error.message,
+                    chat: messagePayload?.chat
+                });
+            }
+        });
     });
 }
 
