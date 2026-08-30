@@ -53,7 +53,10 @@ function initSocketServer(httpServer) {
     });
 
     io.on("connection", (socket) => {
-        console.log("New Socket Connected:", socket.id, "| User:", socket.user?.email || socket.user?._id);
+        socket.on("ai-message",async (messagePayload)=>{
+            console.log("Received ai-message:", messagePayload);
+            
+        })
     });
 }
 
