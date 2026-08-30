@@ -21,6 +21,7 @@
   "homepage": "https://github.com/itsam-13/Project-GPT#readme",
   "dependencies": {
     "bcryptjs": "^3.0.3",
+    "cookie": "^2.0.1",
     "cookie-parser": "^1.4.7",
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
