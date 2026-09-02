@@ -2,7 +2,7 @@ const { Server } = require("socket.io");
 const cookie = require('cookie');
 const jwt = require('jsonwebtoken');
 const userModel = require('../models/user.model');
-const aiService = require('../Services/ai.services')
+const aiService = require('../Services/ai.service')
 const msgModel = require('../models/msg.model')
 
 function initSocketServer(httpServer) {
