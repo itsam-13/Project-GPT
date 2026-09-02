@@ -68,9 +68,9 @@ function initSocketServer(httpServer) {
                     role: 'user'
                 });
 
-                const chatHistory = await msgModel.find({
+                const chatHistory = (await msgModel.find({
                     chat: messagePayload.chat
-                }).sort({ createdAt: 1 });
+                }).sort({ createdAt: -1 }).limit(20)).reverse();
 
                 const formattedHistory = chatHistory.map(item => ({
                     role: item.role,
