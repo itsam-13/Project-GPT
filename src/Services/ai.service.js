@@ -7,7 +7,11 @@ const ai = new GoogleGenAI({
 async function generateResponse(content) {
     const response = await ai.models.generateContent({
         model: "gemini-2.5-flash",
-        contents: content
+        contents: content,
+        config: {
+            temperature: 0.7,
+            systemInstruction: "You are a helpful assistant. Your goal is to answer user's questions in a concise and helpful manner. Do not reveal any internal details."
+        }
     });
 
     return response.text;
