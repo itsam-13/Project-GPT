@@ -70,42 +70,55 @@ function initSocketServer(httpServer) {
                     role: 'user'
                 });
 
-                //vector
-
+                // Vector & Memory
                 const vectors = await aiService.generateVector(messagePayload.content);
+
+                const memory = await queryMemory({
+                    queryVectors: vectors,
+                    limit: 5,
+                    metadata: {
+                        user: socket.user._id.toString()
+                    }
+                });
 
                 await createMemory({
                     vectors,
                     metadata: {
                         id: userMsg._id.toString(),
-                        chat: messagePayload.chat,
+                        user: socket.user._id.toString(),
+                        chat: messagePayload.chat.toString(),
                         text: messagePayload.content,
                         role: 'user'
                     }
-                })
-
-                const memory = await queryMemory({
-                    queryVectors: vectors,
-                    limit: 3,
-                    metadata: {
-                        chat: messagePayload.chat
-                    }
-                })
+                });
 
                 const chatHistory = (await msgModel.find({
                     chat: messagePayload.chat
                 }).sort({ createdAt: -1 }).limit(20)).reverse();
 
-                const formattedHistory = chatHistory.map(item => ({
+                const stm = chatHistory.map(item => ({
                     role: item.role,
                     parts: [{
                         text: item.content
                     }]
                 }));
 
-                console.log("Chat History:", formattedHistory);
+                const ltm = (memory && memory.length > 0) ? [{
+                    role: "user",
+                    parts: [{
+                        text: `These are some previous messages from the chat, use to generate a response:\n${memory.map(item => item.metadata?.text).filter(Boolean).join("\n")}`
+                    }]
+                }, {
+                    role: "model",
+                    parts: [{
+                        text: "Understood, I will use these previous messages as context to assist you."
+                    }]
+                }] : [];
 
-                const response = await aiService.generateResponse(formattedHistory);
+                console.log("LTM:", JSON.stringify(ltm, null, 2));
+                console.log("STM:", JSON.stringify(stm, null, 2));
+
+                const response = await aiService.generateResponse([...ltm, ...stm]);
 
                 const responseVectors = await aiService.generateVector(response);
 
@@ -118,10 +131,10 @@ function initSocketServer(httpServer) {
 
                 await createMemory({
                     vectors: responseVectors,
-                    messageId: responseMsg._id.toString(),
                     metadata: {
                         id: responseMsg._id.toString(),
-                        chat: messagePayload.chat,
+                        user: socket.user._id.toString(),
+                        chat: messagePayload.chat.toString(),
                         text: response,
                         role: 'model'
                     }
