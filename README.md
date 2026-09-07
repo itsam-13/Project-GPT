@@ -1,44 +1,32 @@
-# ChatGPT Backend (Project-GPT)
+# GPT Clone
+> 🔧 Backend-focused project
 
-A scalable Node.js and Express backend API for a ChatGPT clone application. It provides user authentication, real-time AI conversational chat using Google Gemini, semantic long-term memory powered by Pinecone Vector Database, WebSocket communication via Socket.IO, and persistent conversation history using MongoDB (Mongoose).
-
----
-
-## 🚀 Features Implemented
-
-- **User Authentication**:
-  - Registration (`POST /api/auth/register`) with hashed passwords using `bcryptjs`.
-  - Login (`POST /api/auth/login`) with JWT tokens signed and delivered in secure HTTP cookies (`cookie-parser`).
-  - Route protection middleware (`authUser`) verifying JWT tokens.
-- **Chat Session Management**:
-  - Create new chat threads (`POST /api/chat/`) linked to the authenticated user.
-- **Google Gemini AI Integration**:
-  - Chat completions powered by `@google/genai` using the `gemini-2.5-flash` model.
-  - Multi-turn conversation awareness formatted with Gemini-compatible alternating roles (`user` and `model`).
-  - Text embedding generation using `gemini-embedding-001` (768-dimensional dense vector embeddings).
-- **Dual-Layer Memory Architecture (STM + LTM)**:
-  - **Short-Term Memory (STM)**: Fetches the last 20 messages of the active chat thread from MongoDB to preserve immediate conversational continuity.
-  - **Long-Term Memory (LTM)**: Vector similarity search via `@pinecone-database/pinecone` (v8) querying across all past chats belonging to the authenticated user (`user` metadata filter).
-  - **Self-Match Prevention**: Semantic search executes *before* new message ingestion so the user's current prompt is not matched against itself.
-  - **Conditional Context Injection**: Automatically omits memory tokens if no prior relevant context exists, preventing blank prompt overhead.
-- **Real-Time Communication (Socket.IO)**:
-  - Flexible handshake authentication supporting JWT tokens via Cookies, Auth payload, Authorization headers, or Query parameters.
-  - Real-time `ai-message` event pipeline: stores messages in Mongo, creates vector embeddings, queries semantic memory, loads short-term history, triggers Gemini AI, indexes the response, and emits `ai-response`.
-- **Database & Message Persistence**:
-  - MongoDB connection using `mongoose` with custom DNS configuration for reliable Atlas SRV resolution.
-  - Message schema storing conversation history with role tagging (`user` vs `model`).
+A ChatGPT clone with a **Node.js + Express** backend powering real-time AI chat via Google Gemini, dual-layer memory (MongoDB STM + Pinecone LTM), and Socket.IO. Includes a lightweight React frontend for UI demonstration.
 
 ---
 
-## 🧠 Memory Architecture (STM vs. LTM)
+## ✨ Frontend Features
 
-| Feature | Short-Term Memory (STM) | Long-Term Memory (LTM) |
-| :--- | :--- | :--- |
-| **Storage Engine** | MongoDB (`msgModel`) | Pinecone Vector Database (`project-gpt` index) |
-| **Retrieval Mechanism** | Chronological query (`createdAt: -1`, `limit: 20`) | Cosine similarity vector search (`topK: 5`) |
-| **Scope** | Current chat thread (`chat: messagePayload.chat`) | Global across all chats for the user (`user: socket.user._id`) |
-| **Purpose** | Immediate conversational flow and recent context | Recalling relevant knowledge, topics, and preferences from past chats |
-| **Turn Formatting** | Alternating conversation turns | Injected as a `user` context block with a synthetic `model` confirmation |
+- **Login & Register pages** with animated floating orb backgrounds and glassmorphism cards
+- **Mobile-first responsive design** — sidebar drawer on mobile, inline on desktop
+- **Auto dark/light theme** via `prefers-color-scheme` CSS media query — no JavaScript needed
+- **Centralized CSS variables** in `styles/theme.css` for easy theming
+- **Inline error handling** on auth forms — prompts user to register if account not found
+- **Home/Chat page** with collapsible sidebar, conversation history, and suggestion cards
+- Axios-based API integration with `withCredentials` for cookie auth
+
+---
+
+## 🚀 Backend Features
+
+- **User Authentication** — Register & Login with bcrypt password hashing and JWT in HTTP cookies
+- **Google Gemini AI** — Chat completions via `gemini-2.5-flash`, embeddings via `gemini-embedding-001`
+- **Dual-Layer Memory**:
+  - **STM** — Last 20 messages from MongoDB for conversational continuity
+  - **LTM** — Pinecone vector similarity search across all past chats
+- **Real-Time Chat** via Socket.IO with flexible JWT handshake (Cookie / Auth / Header / Query)
+- **MongoDB + Mongoose** — Persistent users, chats, and messages
+- **CORS** configured for `http://localhost:5173`
 
 ---
 
@@ -54,34 +42,34 @@ sequenceDiagram
     participant Pinecone as Pinecone Vector DB
 
     Client->>Server: emit("ai-message", { chat, content })
-    Server->>Mongo: Save user message (msgModel.create)
-    Server->>Gemini: Generate 768-d vector embedding (gemini-embedding-001)
-    Server->>Pinecone: Query top-5 semantic memories for user (queryMemory)
-    Server->>Pinecone: Upsert user message vector + metadata (createMemory)
-    Server->>Mongo: Fetch last 20 messages for short-term history (STM)
-    Server->>Gemini: Generate response with [...LTM, ...STM] (gemini-2.5-flash)
-    Server->>Gemini: Generate vector for AI response
-    Server->>Mongo: Save AI response (msgModel.create)
-    Server->>Pinecone: Upsert AI response vector + user metadata (createMemory)
+    Server->>Mongo: Save user message
+    Server->>Gemini: Generate 768-d embedding
+    Server->>Pinecone: Query top-5 semantic memories (LTM)
+    Server->>Pinecone: Upsert user message vector
+    Server->>Mongo: Fetch last 20 messages (STM)
+    Server->>Gemini: Generate response with [...LTM, ...STM]
+    Server->>Mongo: Save AI response
+    Server->>Pinecone: Upsert AI response vector
     Server->>Client: emit("ai-response", { content, chat })
 ```
 
 ---
 
-## 🛠️ Tech Stack & Dependencies
+## 🛠️ Tech Stack
 
-| Technology                       | Purpose                                                      |
-| -------------------------------- | ------------------------------------------------------------ |
-| **Node.js & Express.js**         | Backend server framework & REST API routing                  |
-| **MongoDB & Mongoose**           | NoSQL database & document modeling                           |
-| **Pinecone Vector Database**     | Long-term vector memory & semantic similarity search         |
-| **Google Gemini API**            | Generative AI completions (`gemini-2.5-flash`) & embeddings  |
-| **Socket.IO**                    | Full-duplex real-time WebSocket communication                |
-| **JSONWebToken (JWT)**           | Stateless user authentication & session management           |
-| **BcryptJS**                     | Secure one-way password hashing                              |
-| **Cookie & Cookie-Parser**       | HTTP cookie parsing and token handling                       |
-| **Dotenv**                       | Environment variable configuration                           |
-| **Nodemon**                      | Development server live reloading                            |
+| Layer | Technology | Purpose |
+|-------|-----------|---------|
+| **Frontend** | React 19 + Vite | UI framework & dev server |
+| **Frontend** | React Router v7 | Client-side routing |
+| **Frontend** | Axios | HTTP requests with cookie support |
+| **Frontend** | CSS Variables | Centralized dark/light theming |
+| **Backend** | Node.js + Express | REST API server |
+| **Backend** | MongoDB + Mongoose | User, chat & message persistence |
+| **Backend** | Pinecone | Long-term vector memory (LTM) |
+| **Backend** | Google Gemini API | AI completions & embeddings |
+| **Backend** | Socket.IO | Real-time bidirectional chat |
+| **Backend** | JWT + bcryptjs | Auth & password hashing |
+| **Backend** | Cookie-Parser + CORS | Cookie handling & cross-origin config |
 
 ---
 
@@ -89,38 +77,49 @@ sequenceDiagram
 
 ```text
 ChatGpt-Backend/
-├── .env                       # Environment variables (Mongo, JWT, Gemini, Pinecone)
-├── .gitignore                 # Files to ignore in Git
-├── package.json               # Project dependencies and scripts
-├── server.js                  # Entry point (HTTP server, DB connection & Socket initializer)
-└── src/
-    ├── app.js                 # Express app initialization & middleware configuration
-    ├── database/
-    │   └── db.js              # MongoDB database connection configuration with custom DNS
-    ├── Sockets/
-    │   └── sockets.server.js  # Socket.IO authentication, events, dual STM/LTM memory & AI pipeline
-    ├── Services/
-    │   ├── ai.service.js      # Google Gemini completion & vector embedding service
-    │   └── vector.service.js  # Pinecone index upsert & semantic query service
-    ├── Middlewares/
-    │   └── auth.middleware.js # Middleware for protecting HTTP routes via JWT
-    ├── models/
-    │   ├── user.model.js      # User schema (email, fullname, password)
-    │   ├── chat.model.js      # Chat schema (user reference, title, lastActive)
-    │   └── msg.model.js       # Message schema (chat, user, content, role)
-    ├── controllers/
-    │   ├── auth.controller.js # Logic for user registration & login
-    │   └── chat.controller.js # Logic for creating and managing chats
-    └── routes/
-        ├── auth.routes.js     # Auth API endpoint definitions
-        └── chat.routes.js     # Chat API endpoint definitions
+├── FrontEnd/                      # React + Vite frontend
+│   └── src/
+│       ├── App.jsx                # Root component
+│       ├── App.css                # Global reset + theme import
+│       ├── AppRoutes.jsx          # React Router route definitions
+│       ├── main.jsx               # React entry point
+│       ├── styles/
+│       │   ├── theme.css          # CSS variables (dark + light tokens)
+│       │   ├── auth.css           # Login & Register styles + animations
+│       │   └── home.css           # Home/chat page styles
+│       └── pages/
+│           ├── Login.jsx          # Login page
+│           ├── Register.jsx       # Register page
+│           └── Home.jsx           # Chat home page
+│
+└── BackEnd/                       # Node.js + Express backend
+    ├── .env                       # Environment variables
+    ├── server.js                  # Entry point (HTTP + Socket.IO + DB)
+    └── src/
+        ├── app.js                 # Express app, middleware, CORS, routes
+        ├── database/db.js         # MongoDB connection
+        ├── Sockets/sockets.server.js  # Socket.IO auth & AI pipeline
+        ├── Services/
+        │   ├── ai.service.js      # Gemini completions & embeddings
+        │   └── vector.service.js  # Pinecone upsert & query
+        ├── Middlewares/auth.middleware.js  # JWT route protection
+        ├── models/
+        │   ├── user.model.js
+        │   ├── chat.model.js
+        │   └── msg.model.js
+        ├── controllers/
+        │   ├── auth.controller.js
+        │   └── chat.controller.js
+        └── routes/
+            ├── auth.routes.js
+            └── chat.routes.js
 ```
 
 ---
 
 ## 🔑 Environment Variables
 
-Create a `.env` file in the project root directory with the following configuration:
+Create a `.env` file inside `BackEnd/`:
 
 ```env
 PORT=3000
@@ -130,130 +129,73 @@ GEMINI_API_KEY=your_google_gemini_api_key
 PINECONE_API_KEY=your_pinecone_api_key
 ```
 
-> **Note**: Ensure your Pinecone account has an index named `project-gpt` created with **768 dimensions** and **cosine** metric to match `gemini-embedding-001`.
+> **Note**: Pinecone index must be named `project-gpt` with **768 dimensions** and **cosine** metric.
 
 ---
 
-## ⚙️ Installation & Setup
+## ⚙️ Getting Started
 
-1. **Clone the Repository**:
-   ```bash
-   git clone https://github.com/itsam-13/Project-GPT.git
-   cd ChatGpt-Backend
-   ```
+### Backend
 
-2. **Install Dependencies**:
-   ```bash
-   npm install
-   ```
-
-3. **Configure Environment Variables**:
-   Create your `.env` file and supply `MONGO_URL`, `JWT_SECRET`, `GEMINI_API_KEY`, and `PINECONE_API_KEY`.
-
-4. **Run the Development Server**:
-   ```bash
-   npm run dev
-   ```
-
-   The server will start on `http://localhost:3000`.
-
----
-
-## 🔌 HTTP API Endpoints
-
-### Authentication Routes (`/api/auth`)
-
-| Method | Endpoint             | Description                            | Auth Required |
-| ------ | -------------------- | -------------------------------------- | ------------- |
-| `POST` | `/api/auth/register` | Register a new user                    | ❌ No         |
-| `POST` | `/api/auth/login`    | Login user & receive HTTP cookie token | ❌ No         |
-
-#### Register Request Body:
-```json
-{
-  "email": "user@example.com",
-  "fullName": {
-    "firstName": "John",
-    "lastName": "Doe"
-  },
-  "password": "yourpassword"
-}
+```bash
+cd BackEnd
+npm install
+npm run dev
+# Runs on http://localhost:3000
 ```
 
-#### Login Request Body:
+### Frontend
+
+```bash
+cd FrontEnd
+npm install
+npm run dev
+# Runs on http://localhost:5173
+```
+
+---
+
+## 🔌 API Endpoints
+
+### Auth Routes (`/api/auth`)
+
+| Method | Endpoint | Description | Auth |
+|--------|----------|-------------|------|
+| `POST` | `/api/auth/register` | Register new user | ❌ |
+| `POST` | `/api/auth/login` | Login & set cookie | ❌ |
+
+#### Register body:
 ```json
 {
+  "fullName": { "firstName": "John", "lastName": "Doe" },
   "email": "user@example.com",
   "password": "yourpassword"
 }
 ```
 
----
+#### Login body:
+```json
+{ "email": "user@example.com", "password": "yourpassword" }
+```
 
 ### Chat Routes (`/api/chat`)
 
-| Method | Endpoint     | Description               | Auth Required         |
-| ------ | ------------ | ------------------------- | --------------------- |
-| `POST` | `/api/chat/` | Create a new chat session | ✅ Yes (Cookie / JWT) |
-
-#### Create Chat Request Body:
-```json
-{
-  "title": "Discussion on Node.js"
-}
-```
+| Method | Endpoint | Description | Auth |
+|--------|----------|-------------|------|
+| `POST` | `/api/chat/` | Create new chat session | ✅ Cookie/JWT |
 
 ---
 
-## ⚡ Socket.IO Real-Time AI Chat
+## ⚡ Socket.IO Events
 
-### 1. Connection & Authentication
+| Event | Direction | Payload | Description |
+|-------|-----------|---------|-------------|
+| `ai-message` | Client → Server | `{ chat: string, content: string }` | Send prompt to AI |
+| `ai-response` | Server → Client | `{ chat: string, content: string }` | Receive AI reply |
+| `ai-error` | Server → Client | `{ chat: string, message: string }` | Error during AI processing |
 
-Clients can authenticate via any of the following methods during the Socket.IO handshake:
-
-- **Auth Payload**: `{ auth: { token: "YOUR_JWT_TOKEN" } }`
-- **Cookies**: `Cookie: token=YOUR_JWT_TOKEN`
-- **Authorization Header**: `Authorization: Bearer YOUR_JWT_TOKEN`
-- **Query Parameter**: `?token=YOUR_JWT_TOKEN`
-
-### 2. Client-Side Implementation Example
-
-```javascript
-import { io } from "socket.io-client";
-
-const socket = io("http://localhost:3000", {
-  auth: {
-    token: "YOUR_JWT_TOKEN"
-  },
-  withCredentials: true
-});
-
-socket.on("connect", () => {
-  console.log("Connected to AI Socket server:", socket.id);
-});
-
-// Send a message to the AI
-socket.emit("ai-message", {
-  chat: "66d1234567890abcdef12345", // Chat ObjectId
-  content: "Can you explain vector databases and Pinecone?"
-});
-
-// Listen for AI Response
-socket.on("ai-response", (data) => {
-  console.log("AI Response:", data.content);
-  console.log("Chat ID:", data.chat);
-});
-
-// Listen for Errors
-socket.on("ai-error", (err) => {
-  console.error("AI Error:", err.message);
-});
-```
-
-### 3. Events Summary
-
-| Event         | Direction       | Payload                             | Description                                            |
-| ------------- | --------------- | ----------------------------------- | ------------------------------------------------------ |
-| `ai-message`  | Client ➔ Server | `{ chat: string, content: string }` | Sends a prompt to the AI within a specific chat thread |
-| `ai-response` | Server ➔ Client | `{ chat: string, content: string }` | Returns the generated Gemini AI response               |
-| `ai-error`    | Server ➔ Client | `{ chat: string, message: string }` | Emitted when an error occurs during AI processing      |
+### Authentication methods (any one):
+- Cookie: `token=YOUR_JWT`
+- Auth payload: `{ auth: { token: "YOUR_JWT" } }`
+- Header: `Authorization: Bearer YOUR_JWT`
+- Query: `?token=YOUR_JWT`
