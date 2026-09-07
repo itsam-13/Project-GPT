@@ -1,0 +1,398 @@
+/* ============================================================
+   home.css — Home / Chat page styles
+   Mobile-first, uses CSS variables from theme.css
+   ============================================================ */
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Root layout ── */
+.home-wrapper {
+  display: flex;
+  height: 100vh;
+  background: var(--clr-bg);
+  font-family: var(--font-family);
+  color: var(--clr-text-primary);
+  overflow: hidden;
+  position: relative;
+}
+
+/* ── Sidebar overlay (mobile) ── */
+.sidebar-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 10;
+}
+
+.sidebar-overlay.active {
+  display: block;
+}
+
+/* ── Sidebar ── */
+.home-sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100vh;
+  width: 260px;
+  background: var(--clr-bg-secondary);
+  border-right: 1px solid var(--clr-border);
+  display: flex;
+  flex-direction: column;
+  padding: 1.25rem 1rem;
+  z-index: 20;
+  transform: translateX(-100%);
+  transition: transform var(--transition-med);
+  overflow: hidden;
+}
+
+.home-sidebar.open {
+  transform: translateX(0);
+}
+
+/* On desktop: sidebar is part of normal flow */
+@media (min-width: 768px) {
+  .home-sidebar {
+    position: relative;
+    transform: translateX(0);
+    flex-shrink: 0;
+    transition: width var(--transition-med), padding var(--transition-med);
+  }
+
+  .home-sidebar.closed-desktop {
+    width: 0;
+    padding: 0;
+    overflow: hidden;
+    border-right: none;
+  }
+
+  .sidebar-overlay {
+    display: none !important;
+  }
+}
+
+/* ── Sidebar internals ── */
+.sidebar-new-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.65rem 0.9rem;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--clr-border-strong);
+  background: transparent;
+  color: var(--clr-text-primary);
+  font-size: 0.88rem;
+  font-weight: 600;
+  font-family: var(--font-family);
+  cursor: pointer;
+  margin-bottom: 1.25rem;
+  width: 100%;
+  transition: background var(--transition-fast);
+}
+
+.sidebar-new-btn:hover {
+  background: var(--clr-surface-hover);
+}
+
+.sidebar-history-label {
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: var(--clr-text-muted);
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  margin: 0 0 0.6rem 0.25rem;
+}
+
+.sidebar-history-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.sidebar-history-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+  padding: 0.625rem 0.625rem;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: background var(--transition-fast);
+}
+
+.sidebar-history-item:hover {
+  background: var(--clr-surface-hover);
+}
+
+.sidebar-history-icon {
+  font-size: 0.85rem;
+  margin-top: 2px;
+  flex-shrink: 0;
+}
+
+.sidebar-history-title {
+  margin: 0;
+  font-size: 0.82rem;
+  color: var(--clr-text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sidebar-history-time {
+  margin: 2px 0 0;
+  font-size: 0.7rem;
+  color: var(--clr-text-muted);
+}
+
+.sidebar-footer {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-top: auto;
+  padding-top: 1rem;
+  border-top: 1px solid var(--clr-border);
+}
+
+.sidebar-avatar {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: var(--gradient-accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.88rem;
+  flex-shrink: 0;
+  color: #fff;
+}
+
+.sidebar-user-name {
+  margin: 0;
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+.sidebar-logout-link {
+  font-size: 0.75rem;
+  color: var(--clr-text-muted);
+  text-decoration: none;
+  transition: color var(--transition-fast);
+}
+
+.sidebar-logout-link:hover {
+  color: var(--clr-accent);
+}
+
+/* ── Main area ── */
+.home-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  min-width: 0;
+}
+
+/* ── Topbar ── */
+.home-topbar {
+  display: flex;
+  align-items: center;
+  padding: 0.875rem 1.25rem;
+  border-bottom: 1px solid var(--clr-border);
+  gap: 0.875rem;
+  flex-shrink: 0;
+}
+
+.topbar-toggle-btn {
+  background: transparent;
+  border: none;
+  color: var(--clr-text-secondary);
+  font-size: 1.25rem;
+  cursor: pointer;
+  padding: 0.2rem 0.4rem;
+  border-radius: var(--radius-sm);
+  transition: background var(--transition-fast);
+  line-height: 1;
+}
+
+.topbar-toggle-btn:hover {
+  background: var(--clr-surface-hover);
+}
+
+.topbar-title {
+  font-weight: 700;
+  font-size: 1rem;
+  flex: 1;
+}
+
+.topbar-model-badge {
+  padding: 0.25rem 0.65rem;
+  border-radius: 20px;
+  background: rgba(167, 139, 250, 0.12);
+  border: 1px solid rgba(167, 139, 250, 0.28);
+  font-size: 0.75rem;
+  color: var(--clr-accent);
+  font-weight: 600;
+}
+
+/* ── Chat area ── */
+.home-chat-area {
+  flex: 1;
+  overflow-y: auto;
+  padding: clamp(1.5rem, 5vw, 2.5rem) clamp(1rem, 4vw, 1.5rem);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ── Welcome screen ── */
+.home-welcome {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  max-width: 600px;
+  width: 100%;
+  text-align: center;
+  animation: fadeIn 0.5s ease both;
+}
+
+.home-welcome-icon {
+  font-size: clamp(2rem, 8vw, 3rem);
+  color: var(--clr-accent);
+  margin-bottom: 1rem;
+}
+
+.home-welcome-title {
+  margin: 0 0 0.6rem;
+  font-size: clamp(1.25rem, 4.5vw, 1.75rem);
+  font-weight: 700;
+}
+
+.home-welcome-sub {
+  margin: 0 0 2.25rem;
+  font-size: 0.9rem;
+  color: var(--clr-text-secondary);
+}
+
+/* ── Suggestion cards ── */
+.suggestions-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.75rem;
+  width: 100%;
+}
+
+@media (min-width: 480px) {
+  .suggestions-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.suggestion-card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.4rem;
+  padding: 1rem;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--clr-border);
+  background: var(--clr-surface);
+  cursor: pointer;
+  text-align: left;
+  font-family: var(--font-family);
+  transition: background var(--transition-fast),
+              border-color var(--transition-fast),
+              transform var(--transition-fast);
+}
+
+.suggestion-card:hover {
+  background: var(--clr-surface-hover);
+  border-color: var(--clr-accent);
+  transform: translateY(-2px);
+}
+
+.suggestion-icon {
+  font-size: 1.25rem;
+}
+
+.suggestion-text {
+  font-size: 0.82rem;
+  color: var(--clr-text-secondary);
+}
+
+/* ── Input bar ── */
+.home-input-bar {
+  padding: 1rem 1.25rem 0.75rem;
+  border-top: 1px solid var(--clr-border);
+  flex-shrink: 0;
+}
+
+.home-input-form {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  background: var(--clr-surface);
+  border: 1px solid var(--clr-border);
+  border-radius: var(--radius-lg);
+  padding: 0.625rem 0.875rem;
+  transition: border-color var(--transition-fast),
+              box-shadow var(--transition-fast);
+}
+
+.home-input-form:focus-within {
+  border-color: var(--clr-accent);
+  box-shadow: 0 0 0 3px rgba(167, 139, 250, 0.12);
+}
+
+.home-text-input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: var(--clr-text-primary);
+  font-size: 0.95rem;
+  font-family: var(--font-family);
+  min-width: 0;
+}
+
+.home-text-input::placeholder {
+  color: var(--clr-text-muted);
+}
+
+.home-send-btn {
+  background: var(--gradient-accent);
+  border: none;
+  border-radius: var(--radius-sm);
+  color: #fff;
+  font-size: 1rem;
+  padding: 0.4rem 0.75rem;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: opacity var(--transition-fast),
+              transform var(--transition-fast);
+}
+
+.home-send-btn:hover:not(:disabled) {
+  transform: scale(1.05);
+}
+
+.home-send-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.home-disclaimer {
+  margin-top: 0.5rem;
+  font-size: 0.7rem;
+  color: var(--clr-text-muted);
+  text-align: center;
+}

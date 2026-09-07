@@ -30,13 +30,13 @@ async function registerUser(req, res) {
     res.cookie("token", token)
 
     res.status(201).json({
+        success: true,
         message: "User registered successfully",
         user: {
             email: user.email,
             _id: user._id,
             fullName: user.fullName
         }
-
     })
 
 }
@@ -47,7 +47,7 @@ async function loginUser(req, res) {
     const user = await userModel.findOne({ email })
 
     if (!user) {
-        return res.status(404).json({ message: "Invalid email or password" })
+        return res.status(401).json({ message: "Invalid email or password" })
     }
     const isPasswordValid = await bcrypt.compare(password, user.password)
 
@@ -60,13 +60,13 @@ async function loginUser(req, res) {
     res.cookie("token", token)
 
     res.status(200).json({
+        success: true,
         message: "User logged in successfully",
         user: {
             email: user.email,
             _id: user._id,
             fullName: user.fullName
         }
-
     })
 
 }

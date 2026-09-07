@@ -1,0 +1,305 @@
+/* ============================================================
+   auth.css — Login & Register shared styles
+   Mobile-first, uses CSS variables from theme.css
+   ============================================================ */
+
+/* ── Animated background orbs ── */
+@keyframes orbFloat {
+  0%   { transform: translate(0, 0)      scale(1);   }
+  25%  { transform: translate(40px, -60px) scale(1.08); }
+  50%  { transform: translate(-30px, 40px) scale(0.94); }
+  75%  { transform: translate(20px, 30px)  scale(1.05); }
+  100% { transform: translate(0, 0)      scale(1);   }
+}
+
+@keyframes orbPulse {
+  0%, 100% { opacity: 0.5; }
+  50%       { opacity: 0.9; }
+}
+
+@keyframes fadeSlideUp {
+  from { opacity: 0; transform: translateY(28px); }
+  to   { opacity: 1; transform: translateY(0);    }
+}
+
+/* ── Page wrapper ── */
+.auth-page {
+  position: relative;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--gradient-auth-bg);
+  font-family: var(--font-family);
+  padding: 1.25rem;
+  overflow: hidden;
+}
+
+/* ── Animated background blobs ── */
+.auth-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  pointer-events: none;
+  will-change: transform, opacity;
+}
+
+.auth-orb--1 {
+  width: clamp(200px, 40vw, 420px);
+  height: clamp(200px, 40vw, 420px);
+  background: var(--clr-orb-1);
+  top: -10%;
+  left: -10%;
+  animation: orbFloat 12s ease-in-out infinite,
+             orbPulse 6s ease-in-out infinite;
+}
+
+.auth-orb--2 {
+  width: clamp(150px, 35vw, 360px);
+  height: clamp(150px, 35vw, 360px);
+  background: var(--clr-orb-2);
+  bottom: -8%;
+  right: -8%;
+  animation: orbFloat 15s ease-in-out infinite reverse,
+             orbPulse 8s ease-in-out infinite 2s;
+}
+
+.auth-orb--3 {
+  width: clamp(100px, 25vw, 280px);
+  height: clamp(100px, 25vw, 280px);
+  background: var(--clr-orb-3);
+  top: 55%;
+  left: 60%;
+  animation: orbFloat 10s ease-in-out infinite 3s,
+             orbPulse 5s ease-in-out infinite 1s;
+}
+
+/* ── Card ── */
+.auth-card {
+  position: relative;
+  z-index: 1;
+  background: var(--clr-surface);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid var(--clr-border);
+  border-radius: var(--radius-xl);
+  padding: clamp(1.75rem, 5vw, 3rem) clamp(1.25rem, 5vw, 2.5rem);
+  width: 100%;
+  max-width: 440px;
+  box-shadow: var(--shadow-card);
+  animation: fadeSlideUp 0.5s var(--transition-med) both;
+}
+
+/* ── Branding ── */
+.auth-logo-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  margin-bottom: 1.75rem;
+}
+
+.auth-logo-icon {
+  font-size: 1.75rem;
+  color: var(--clr-accent);
+}
+
+.auth-logo-name {
+  margin: 0;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--clr-text-primary);
+  letter-spacing: 0.4px;
+}
+
+/* ── Headings ── */
+.auth-title {
+  margin: 0 0 0.4rem;
+  font-size: clamp(1.3rem, 4vw, 1.65rem);
+  font-weight: 700;
+  color: var(--clr-text-primary);
+  text-align: center;
+}
+
+.auth-subtitle {
+  margin: 0 0 2rem;
+  font-size: 0.88rem;
+  color: var(--clr-text-secondary);
+  text-align: center;
+}
+
+/* ── Form ── */
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+/* First/Last name row — stacks on mobile, side-by-side on tablet+ */
+.auth-name-row {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+@media (min-width: 400px) {
+  .auth-name-row {
+    flex-direction: row;
+  }
+
+  .auth-name-row .auth-input-group {
+    flex: 1;
+    min-width: 0; /* prevents flex children from overflowing */
+  }
+}
+
+/* ── Input group ── */
+.auth-input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.38rem;
+}
+
+.auth-label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--clr-text-secondary);
+  letter-spacing: 0.25px;
+}
+
+.auth-input {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--clr-border);
+  background: var(--clr-input-bg);
+  color: var(--clr-text-primary);
+  font-size: 0.95rem;
+  font-family: var(--font-family);
+  outline: none;
+  transition: border-color var(--transition-fast),
+              box-shadow var(--transition-fast);
+  box-sizing: border-box;
+}
+
+.auth-input::placeholder {
+  color: var(--clr-text-muted);
+}
+
+.auth-input:focus {
+  border-color: var(--clr-accent);
+  box-shadow: 0 0 0 3px rgba(167, 139, 250, 0.15);
+}
+
+/* Fix browser autofill overriding background */
+.auth-input:-webkit-autofill,
+.auth-input:-webkit-autofill:hover,
+.auth-input:-webkit-autofill:focus {
+  -webkit-text-fill-color: var(--clr-text-primary);
+  -webkit-box-shadow: 0 0 0 1000px var(--clr-autofill-bg) inset;
+  transition: background-color 9999s ease-in-out 0s;
+  caret-color: var(--clr-text-primary);
+}
+
+/* ── Forgot link ── */
+.auth-forgot-row {
+  text-align: right;
+}
+
+.auth-forgot-link {
+  font-size: 0.8rem;
+  color: var(--clr-accent);
+  text-decoration: none;
+  transition: opacity var(--transition-fast);
+}
+
+.auth-forgot-link:hover {
+  opacity: 0.75;
+}
+
+/* ── Submit button ── */
+.auth-submit-btn {
+  width: 100%;
+  padding: 0.82rem;
+  border-radius: var(--radius-md);
+  border: none;
+  background: var(--gradient-accent);
+  color: #fff;
+  font-size: 1rem;
+  font-weight: 700;
+  font-family: var(--font-family);
+  cursor: pointer;
+  margin-top: 0.25rem;
+  letter-spacing: 0.3px;
+  transition: opacity var(--transition-fast),
+              transform var(--transition-fast),
+              box-shadow var(--transition-fast);
+}
+
+.auth-submit-btn:hover {
+  opacity: 0.92;
+  transform: translateY(-1px);
+  box-shadow: 0 8px 24px rgba(124, 58, 237, 0.4);
+}
+
+.auth-submit-btn:active {
+  transform: translateY(0);
+  opacity: 1;
+}
+
+/* ── Switch link ── */
+.auth-switch-text {
+  margin-top: 1.75rem;
+  text-align: center;
+  font-size: 0.875rem;
+  color: var(--clr-text-secondary);
+}
+
+.auth-switch-link {
+  color: var(--clr-accent);
+  text-decoration: none;
+  font-weight: 700;
+  transition: opacity var(--transition-fast);
+}
+
+.auth-switch-link:hover {
+  opacity: 0.8;
+}
+
+/* ── Error banner ── */
+@keyframes shakeError {
+  0%, 100% { transform: translateX(0); }
+  20%       { transform: translateX(-6px); }
+  40%       { transform: translateX(6px); }
+  60%       { transform: translateX(-4px); }
+  80%       { transform: translateX(4px); }
+}
+
+.auth-error-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.7rem 1rem;
+  border-radius: var(--radius-md);
+  background: rgba(239, 68, 68, 0.12);
+  border: 1px solid rgba(239, 68, 68, 0.35);
+  color: #fca5a5;
+  font-size: 0.82rem;
+  font-weight: 500;
+  animation: shakeError 0.4s ease;
+}
+
+.auth-error-register-link {
+  color: var(--clr-accent);
+  text-decoration: none;
+  font-weight: 700;
+  white-space: nowrap;
+  font-size: 0.8rem;
+  transition: opacity var(--transition-fast);
+  flex-shrink: 0;
+}
+
+.auth-error-register-link:hover {
+  opacity: 0.8;
+}
