@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" shape-rendering="geometricPrecision">
+  <defs>
+    <!-- Reversed gradient: light highlight to deep dark violet -->
+    <linearGradient id="sparkleGrad" x1="15%" y1="15%" x2="85%" y2="85%">
+      <stop offset="0%" stop-color="#ede9fe"/>
+      <stop offset="30%" stop-color="#a78bfa"/>
+      <stop offset="65%" stop-color="#6d28d9"/>
+      <stop offset="100%" stop-color="#4c1d95"/>
+    </linearGradient>
+    <!-- Reversed gradient for light browser tabs -->
+    <linearGradient id="sparkleGradLight" x1="15%" y1="15%" x2="85%" y2="85%">
+      <stop offset="0%" stop-color="#a78bfa"/>
+      <stop offset="25%" stop-color="#7c3aed"/>
+      <stop offset="60%" stop-color="#5b21b6"/>
+      <stop offset="100%" stop-color="#3b0764"/>
+    </linearGradient>
+  </defs>
+  <style>
+    .star {
+      fill: url(#sparkleGrad);
+    }
+    @media (prefers-color-scheme: light) {
+      .star {
+        fill: url(#sparkleGradLight);
+      }
+    }
+  </style>
+  <path class="star" fill="url(#sparkleGrad)" d="M 16 2 C 16 7.25 24.75 16 30 16 C 24.75 16 16 24.75 16 30 C 16 24.75 7.25 16 2 16 C 7.25 16 16 7.25 16 2 Z" />
+</svg>
