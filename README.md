@@ -12,8 +12,9 @@ A ChatGPT clone with a **Node.js + Express** backend powering real-time AI chat 
 - **Auto dark/light theme** via `prefers-color-scheme` CSS media query — no JavaScript needed
 - **Centralized CSS variables** in `styles/theme.css` for easy theming
 - **Inline error handling** on auth forms — prompts user to register if account not found
-- **Home/Chat page** with collapsible sidebar, conversation history, and suggestion cards
-- Axios-based API integration with `withCredentials` for cookie auth
+- **Home/Chat page** with collapsible sidebar, conversation history, suggestion cards, and typing indicators
+- **Real-time Chat with Socket.IO** — instant response streaming and error handling
+- **Centralized Axios client** with `withCredentials` and automatic Bearer token interceptor
 
 ---
 
@@ -61,7 +62,8 @@ sequenceDiagram
 |-------|-----------|---------|
 | **Frontend** | React 19 + Vite | UI framework & dev server |
 | **Frontend** | React Router v7 | Client-side routing |
-| **Frontend** | Axios | HTTP requests with cookie support |
+| **Frontend** | Axios | HTTP requests with cookie & token support |
+| **Frontend** | Socket.IO Client | Real-time bidirectional chat communication |
 | **Frontend** | CSS Variables | Centralized dark/light theming |
 | **Backend** | Node.js + Express | REST API server |
 | **Backend** | MongoDB + Mongoose | User, chat & message persistence |
@@ -78,11 +80,15 @@ sequenceDiagram
 ```text
 ChatGpt-Backend/
 ├── FrontEnd/                      # React + Vite frontend
+│   ├── .env                       # Frontend environment variables
 │   └── src/
 │       ├── App.jsx                # Root component
 │       ├── App.css                # Global reset + theme import
 │       ├── AppRoutes.jsx          # React Router route definitions
 │       ├── main.jsx               # React entry point
+│       ├── api/
+│       │   ├── axios.js           # Centralized Axios client & interceptors
+│       │   └── socket.js          # Socket.IO connection manager
 │       ├── styles/
 │       │   ├── theme.css          # CSS variables (dark + light tokens)
 │       │   ├── auth.css           # Login & Register styles + animations
@@ -119,7 +125,7 @@ ChatGpt-Backend/
 
 ## 🔑 Environment Variables
 
-Create a `.env` file inside `BackEnd/`:
+### Backend (`BackEnd/.env`)
 
 ```env
 PORT=3000
@@ -130,6 +136,12 @@ PINECONE_API_KEY=your_pinecone_api_key
 ```
 
 > **Note**: Pinecone index must be named `project-gpt` with **768 dimensions** and **cosine** metric.
+
+### Frontend (`FrontEnd/.env`)
+
+```env
+VITE_API_URL=https://project-gpt-csdk.onrender.com
+```
 
 ---
 
@@ -183,6 +195,8 @@ npm run dev
 | Method | Endpoint | Description | Auth |
 |--------|----------|-------------|------|
 | `POST` | `/api/chat/` | Create new chat session | ✅ Cookie/JWT |
+| `GET` | `/api/chat/` | Get all user chats | ✅ Cookie/JWT |
+| `GET` | `/api/chat/:chatId/messages` | Get message history for chat | ✅ Cookie/JWT |
 
 ---
 
