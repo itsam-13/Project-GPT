@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import "../styles/auth.css";
-import axios from "axios";
+import api from "../api/axios";
 
 const Register = () => {
   const navigate = useNavigate();
@@ -29,20 +29,22 @@ const Register = () => {
 
     setLoading(true);
     try {
-      const res = await axios.post(
-        "http://localhost:3000/api/auth/register",
-        {
-          fullName: {
-            firstName: formData.firstName,
-            lastName: formData.lastName,
-          },
-          email: formData.email,
-          password: formData.password,
+      const res = await api.post("/api/auth/register", {
+        fullName: {
+          firstName: formData.firstName,
+          lastName: formData.lastName,
         },
-        { withCredentials: true }
-      );
+        email: formData.email,
+        password: formData.password,
+      });
 
       if (res.data.success) {
+        if (res.data.token) {
+          localStorage.setItem("token", res.data.token);
+        }
+        if (res.data.user) {
+          localStorage.setItem("user", JSON.stringify(res.data.user));
+        }
         navigate("/login");
       }
     } catch (err) {

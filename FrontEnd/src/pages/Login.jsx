@@ -1,13 +1,14 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import "../styles/auth.css";
-import axios from "axios"
+import api from "../api/axios";
 
 const Login = () => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({ email: "", password: "" });
   const [error, setError] = useState("");
   const [notFound, setNotFound] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const handleChange = (e) =>
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -16,24 +17,32 @@ const Login = () => {
     e.preventDefault();
     setError("");
     setNotFound(false);
+    setLoading(true);
     try {
-      const res = await axios.post(
-        "http://localhost:3000/api/auth/login",
-        { email: formData.email, password: formData.password },
-        { withCredentials: true }
-      );
+      const res = await api.post("/api/auth/login", {
+        email: formData.email,
+        password: formData.password,
+      });
+
       if (res.data.success) {
+        if (res.data.token) {
+          localStorage.setItem("token", res.data.token);
+        }
+        if (res.data.user) {
+          localStorage.setItem("user", JSON.stringify(res.data.user));
+        }
         navigate("/");
       }
     } catch (err) {
       const status = err?.response?.status;
       if (status === 401) {
-        // User not found or wrong password — prompt to register
         setNotFound(true);
-        setError("No account found with that email.");
+        setError("Invalid email or password.");
       } else {
-        setError("Something went wrong. Please try again.");
+        setError(err?.response?.data?.message || "Something went wrong. Please try again.");
       }
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -105,8 +114,13 @@ const Login = () => {
             </div>
           )}
 
-          <button type="submit" className="auth-submit-btn">
-            Sign In
+          <button
+            type="submit"
+            className="auth-submit-btn"
+            disabled={loading}
+            style={{ opacity: loading ? 0.7 : 1 }}
+          >
+            {loading ? "Signing in…" : "Sign In"}
           </button>
         </form>
 
